@@ -4,14 +4,19 @@ const { pool } = require("../db");
 
 // Сохранить игру
 router.post("/game", async (req, res) => {
-  const { player, score, duration } = req.body;
+  try {
+    const { player, score, duration } = req.body;
 
-  await pool.query(
-    "INSERT INTO games (player, score, duration) VALUES ($1, $2, $3)",
-    [player, score, duration]
-  );
+    await pool.query(
+      "INSERT INTO games (player, score, duration) VALUES ($1, $2, $3)",
+      [player, score, duration]
+    );
 
-  res.json({ message: "game saved" });
+    res.json({ message: "game saved" });
+  } catch (err) {
+    console.error("Error saving game:", err.message); // ← увидишь ошибку в логах
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Топ 10 игроков
