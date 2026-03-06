@@ -1,0 +1,38 @@
+<h1>Admin panel</h1>
+
+<button onclick="loadGames()">Load games</button>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Player</th>
+      <th>Score</th>
+      <th>Duration</th>
+    </tr>
+  </thead>
+
+  <tbody id="table"></tbody>
+</table>
+
+<script>
+  function loadGames() {
+    fetch("/api/games")
+      .then((res) => res.json())
+      .then((data) => {
+        let html = "";
+
+        data.forEach((g) => {
+          html += `<tr>
+  <td>${g.player}</td>
+  <td>${g.score}</td>
+  <td>${g.duration}</td>
+  </tr>`;
+        });
+
+        document.getElementById("table").innerHTML = html;
+      })
+      .catch((err) => {
+        console.error("API error", err);
+      });
+  }
+</script>

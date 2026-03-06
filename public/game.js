@@ -47,6 +47,7 @@ const CONFIG = {
     maxScore: Number(max) > 0 && Number(max) < 1000 ? max : 5,
     winner: null,
     isOver: false,
+    gameTime: 0,
   },
   // Диапазон и интервал появления & исчезновения объектов (в секундах)/The range and interval of appearance & disappearance of objects (in seconds)
   eventTimeRanges: {
@@ -799,8 +800,10 @@ class Stick {
 }
 
 // Создаём палки и основного мяча перед началом геймплея/Creating sticks and main ball before the start of the gameplay
+// И время тоже/And game time too
 resetSticksPosition();
 resetMainBallPosition();
+resetGameTimeCounter();
 
 // Ввод/Input
 let isOnPause = true;
@@ -854,6 +857,7 @@ window.addEventListener("keydown", (e) => {
     CONFIG.specialObjects.eventsArray.length = 0;
     resetSticksPosition();
     resetMainBallPosition();
+    resetGameTimeCounter();
     console.debug("Game was restarted!");
   }
   sticks.forEach((stick) => {
@@ -897,6 +901,26 @@ function generateRandomVelocities(speedX, speedY) {
   const ry =
     generateRandomSign() * Math.random() * (speedY || CONFIG.ball.minAngle);
   return { rx, ry };
+}
+
+// Функция для форматирования времени в чч:мм:сс | Function for formatting time to hh:mm:ss
+function formatTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  if (h > 0) {
+    const hh = String(h).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
+  } else {
+    return `${mm}:${ss}`;
+  }
+}
+
+// Считаем время игры
+function resetGameTimeCounter() {
+  CONFIG.game.gameTime = Date.now();
 }
 
 // Сбрасываем позицию основного мяча в центр/Reset main ball position to center
@@ -1043,6 +1067,11 @@ function game_loop() {
       canvas.width / 2,
       canvas.height / 2 - 90
     );
+    ctx.fillText(
+      `Time: ${formatTime(CONFIG.game.gameTime)}`,
+      canvas.width / 2,
+      50
+    );
     ctx.fillText('(Press "Enter")', canvas.width / 2, canvas.height / 2 - 120);
 
     return;
@@ -1059,6 +1088,28 @@ function game_loop() {
     });
     timeouts.forEach((i) => {
       clearTimeout(i);
+    });
+    let winnerName = "";
+    if (CONFIG.game.winner == stick1) {
+      winnerName = "Player 1";
+    } else {
+      winnerName = "Player 2";
+    }
+
+    CONFIG.game.gameTime = Math.floor(
+      (Date.now() - CONFIG.game.gameTime) / 1000
+    );
+
+    fetch("/api/game", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        player: winnerName,
+        score: CONFIG.game.maxScore,
+        duration: formatTime(CONFIG.game.gameTime),
+      }),
     });
     return;
   }

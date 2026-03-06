@@ -1,3 +1,5 @@
 Previous versions/
 .vscode/
-script8.js
+node_modules
+.env
+package-lock.json
