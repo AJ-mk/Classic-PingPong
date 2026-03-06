@@ -12,7 +12,7 @@ async function connectDB() {
         id SERIAL PRIMARY KEY,
         player VARCHAR(100),
         score INTEGER,
-        duration INTEGER,
+        duration VARCHAR(20),
         date TIMESTAMP DEFAULT NOW()
       )
     `);
