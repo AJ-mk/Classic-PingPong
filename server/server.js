@@ -28,3 +28,8 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
+
+if (process.env.DISABLE === "true") {
+  console.log("Server disabled");
+  process.exit(0);
+}
